@@ -3,7 +3,7 @@
 |                          |        |                                                              |
 | ------------------------ | ------ | ------------------------------------------------------------ |
 | 分糖果（排序、贪心）     | easy   | https://leetcode.cn/problems/assign-cookies/description/     |
-| 摇摆序列（贪心）         | medium | https://leetcode.cn/problems/wiggle-subsequence/desctiption/ |
+| 摇摆序列（贪心）         | medium | https://leetcode.cn/problems/wiggle-subsequence/description/ |
 | 移除K个数字（栈、贪心）  | medium | https://leetcode.cn/problems/remove-k-digits/description/    |
 | 跳跃游戏（贪心）         | medium | https://leetcode.cn/problems/jump-game/description/          |
 | 跳跃游戏2（贪心）        | hard   | https://leetcode.cn/problems/jump-game-ii/description/       |
