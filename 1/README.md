@@ -355,10 +355,266 @@ public:
 
 <img src="9.png" style="zoom:33%;" />
 
+## STL MAP的使用
 
+```c++
+#include<stdio.h>
+#include<map>//STL map头文件
+struct RandomListNode{
+    int label;
+    RandomListNode *next, *random;
+    RandomListNode(int x):label(x),next(NULL),random(NULL){}
+};
+```
+
+<img src="10.png" style="zoom:33%;" />
+
+```c++
+int main(){
+    std::map<RandomListNode *,int>node_map;
+    RandomListNode a(5);
+    RandomListNode b(3);
+    RandomListNode c(6);
+    a.next=&b;
+    b.next=&c;
+    a.random=&c;
+    b.random=&a;
+    c.random=&c;
+    node_map[&a]=1;
+    node_map[&b]=2;
+    node_map[&c]=3;
+    printf("a.random id = %d\n",node_map[a.random]);
+    printf("b.random id = %d\n",node_map[b.random]);
+    printf("c.random id = %d\n",node_map[c.random]);
+    return 0;
+}
+```
+
+```c++
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;//带有随机指针的链表结点
+    Node* next;
+    Node* random;
+    
+    Node(int _val) {
+        val = _val;
+        next = NULL;
+        random = NULL;
+    }
+};
+*/
+
+class Solution {
+public:
+    Node* copyRandomList(Node* head) {
+        std::map<Node *, int>node_map;//地址到结点位置的map
+        std::vector<Node *>node_vec;//使用vector根据存储结点访问地址
+        Node *ptr = head;
+        int i=0;
+        while(ptr){//将新链表结点push入node_vec，生成了新链表结点位置到地址的map
+            node_vec.push_back(new Node(ptr->val));
+            node_map[ptr]=i;//记录原始链表地址至结点位置的node_map
+            ptr=ptr->next;//遍历原始列表
+            i++;//i记录结点位置
+        }
+        node_vec.push_back(0);
+        ptr=head;
+        i=0;//再次遍历原始列表，连接新链表的next指针、random指针
+        while(ptr){
+            node_vec[i]->next= node_vec[i+1];//连接新链表next指针
+            if(ptr->random){//当random指针不空时
+                int id=node_map[ptr->random];//根据node_map确认
+                node_vec[i]->random=node_vec[id];//原链表random指针指向的位置即id
+            }
+            ptr=ptr->next;
+            i++;
+        }
+        return node_vec[0];
+    }//返回是深度拷贝后的链表
+    //深度拷贝：构造生成一个完全新的链表，即使将原链表毁坏，新链表可独立使用
+};
+```
 
 # 2个排序链表归并
 
+<img src="11.png" style="zoom:33%;" />
 
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        ListNode* l1=list1;
+        ListNode* l2=list2;
+        ListNode temp_head(0);//设置临时头结点temp_head
+        ListNode *pre = &temp_head;//使用pre指针指向temp_head
+        while(l1&&l2){//l1与l2同时不空时，对它们进行比较
+            if(l1->val<l2->val){//如果l1对应的结点小于l2对应的结点
+                pre->next=l1;
+                l1=l1->next;
+            }
+            else{
+                pre->next=l2;
+                l2=l2->next;
+            }//将pre与较小的结点进行连接
+            pre=pre->next;//pre指向新连接的结点
+        }
+        if(l1){//如果l1有剩余
+            pre->next=l1;//将l1接到pre后
+        }
+        if(l2){//如果l2有剩余
+            pre->next=l2;//将l2接到pre后
+        }
+        return temp_head.next;
+    }
+};
+```
 
 # K个排序链表归并
+
+<img src="12.png" style="zoom:33%;" />
+
+## 方法1 暴力合并
+
+## 方法2 排序后相连
+
+```c++
+#include<vector>
+#include<algorithm>//STL排序算法std::sort
+bool cmp(const ListNode* a, const ListNode* b){
+    return a->val<b->val;
+}//比较函数，对结点进行从小到大的排序
+int main(){
+    ListNode a(3);
+    ListNode b(2);
+    ListNode c(5);
+    ListNode d(0);
+    std::vector<ListNode *>node_vec;
+    node_vec.push_back(&a);
+    node_vec.push_back(&b);
+    node_vec.push_back(&c);
+    node_vec.push_back(&d);
+    std::sort(node_vec.begin(),node_vec.end(),cmp);
+    for(int i=0;i<node_vec.size();i++){
+        printf("%d\n",node_vec[i]->val);
+    }
+    return 0;
+}
+```
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+private:
+    
+public:
+    static bool cmp(const ListNode* a, const ListNode* b){
+        return a->val<b->val;
+    }
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        std::vector<ListNode*>node_vec;
+        for(int i=0;i<lists.size();i++){
+            ListNode* head=lists[i];//遍历k个链表,将结点全部添加至node_vec
+            while(head){
+                node_vec.push_back(head);
+                head=head->next;
+            }
+        }
+        if(node_vec.size()==0){
+            return NULL;
+        }
+        std::sort(node_vec.begin(),node_vec.end(),cmp);//根据结点数值进行排序
+        for(int i=1;i<node_vec.size();i++){//连接新的链表
+            node_vec[i-1]->next=node_vec[i];
+        }
+        node_vec[node_vec.size()-1]->next=NULL;
+        return node_vec[0];
+    }
+};
+```
+
+## 方法3 分治后相连
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    static bool cmp(ListNode* a, ListNode* b){
+        return a->val<b->val;
+    }
+    ListNode* mergeTwoLists(ListNode* l1,ListNode* l2){
+        std::vector<ListNode*> node_vec;
+        while(l1){
+            node_vec.push_back(l1);
+            l1=l1->next;
+        }
+        while(l2){
+            node_vec.push_back(l2);
+            l2=l2->next;
+        }
+        if(node_vec.size()==0){
+            return NULL;
+        }
+        std::sort(node_vec.begin(),node_vec.end(),cmp);
+        for(int i=1;i<node_vec.size();i++){
+            node_vec[i-1]->next=node_vec[i];
+        }
+        node_vec[node_vec.size()-1]->next=NULL;
+        return node_vec[0];
+    }
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        if(lists.size()==0){//如果lists为空，返回NULL
+            return NULL;
+        }
+        if(lists.size()==1){
+            return lists[0];
+        }
+        if(lists.size()==2){//如果只有两个list，调用两个list merge函数
+            return mergeTwoLists(lists[0],lists[1]);
+        }
+        int mid = lists.size()/2;
+        std::vector<ListNode*>sub1_lists;
+        std::vector<ListNode*>sub2_lists;//拆分lists为两个子lists
+        for(int i=0;i<mid;i++){
+            sub1_lists.push_back(lists[i]);
+        }
+        for(int i=mid;i<lists.size();i++){
+            sub2_lists.push_back(lists[i]);
+        }
+        ListNode *l1=mergeKLists(sub1_lists);
+        ListNode *l2=mergeKLists(sub2_lists);
+        return mergeTwoLists(l1,l2);//分治处理
+    }
+};
+```
+
