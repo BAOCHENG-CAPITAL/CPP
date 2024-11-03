@@ -1,6 +1,39 @@
 # 乐水私募
 
+# 二分查找
+
 ## 1
+
+[668. 乘法表中第k小的数 - 力扣（LeetCode）](https://leetcode.cn/problems/kth-smallest-number-in-multiplication-table/description/)
+
+<img src="1.png" style="zoom:33%;" />
+
+```c++
+class Solution {
+public:
+    int findKthNumber(int m, int n, int k) {
+        int left = 1, right =m*n;
+        while(left<=right){
+            int count= 0;
+            int mid = (left+right)/2;
+            for(int i=1;i<=m;i++){//遍历每一行
+                count+=std::min(mid/i,n);//根据第一列计算每一行大于mid的数目
+            }
+            if(count>=k){//符合条件的mid尽可能小，巧妙处理了那些不在乘法表中的数（质数）
+                right = mid-1;
+            } 
+            else{
+                left = mid+1;
+            }
+        }
+        return left;
+    }
+};
+```
+
+# 搜索
+
+## 2
 
 [85. 最大矩形 - 力扣（LeetCode）](https://leetcode.cn/problems/maximal-rectangle/description/)
 
@@ -41,34 +74,6 @@ public:
             st.push(i);
         }
         return maxArea;
-    }
-};
-```
-
-## 2
-
-[668. 乘法表中第k小的数 - 力扣（LeetCode）](https://leetcode.cn/problems/kth-smallest-number-in-multiplication-table/description/)
-
-<img src="1.png" style="zoom:33%;" />
-
-```c++
-class Solution {
-public:
-    int findKthNumber(int m, int n, int k) {
-        int left = 1, right = m * n;
-        while (left < right) {
-            int x = left + (right - left) / 2;
-            int count = x / n * n;
-            for (int i = x / n + 1; i <= m; ++i) {
-                count += x / i;
-            }
-            if (count >= k) {
-                right = x;
-            } else {
-                left = x + 1;
-            }
-        }
-        return left;
     }
 };
 ```
@@ -126,6 +131,8 @@ public:
 };
 ```
 
+# 动态规划
+
 ## 4
 
 [188. 买卖股票的最佳时机 IV - 力扣（LeetCode）](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iv/description/)
@@ -166,6 +173,8 @@ public:
     }
 };
 ```
+
+# 其他
 
 ## 5
 
@@ -289,7 +298,25 @@ function productSum(arr1,arr2)
 	return s
 ```
 
+内存映射文件技术是一种将文件或设备映射到进程地址空间的技术，允许应用程序像访问内存一样访问文件。通过这种方式，操作系统将文件内容映射到内存中，使得应用程序可以直接读写内存，而不需要通过常规的文件输入/输出（I/O）操作来处理。
 
+主要特点和优点：
+高效性：内存映射文件可以减少文件操作的开销，因为它允许直接在内存中操作文件内容，从而提高了访问速度。
+
+共享内存：多个进程可以映射同一个文件，这使得它们可以轻松共享数据。
+
+自动管理：操作系统会在需要时自动加载文件内容到内存中，用户不需要手动管理缓冲区。
+
+简化编程：开发者可以通过指针直接操作文件内容，避免了复杂的读写操作。
+
+应用场景：
+大型文件的处理，如数据库、图像处理等。
+需要共享内存的多进程应用。
+实现文件的随机访问。
+实现方式：
+在不同的操作系统中，内存映射文件的实现细节可能有所不同。例如，在Windows中，可以使用CreateFileMapping和MapViewOfFile等API，而在Unix/Linux中，通常使用mmap系统调用。
+
+总的来说，内存映射文件技术是一种高效的文件处理方式，广泛应用于需要高性能和大规模数据处理的场景。
 
 
 
