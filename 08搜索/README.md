@@ -113,3 +113,50 @@ public:
 ```
 
 # 收集雨水2（带优先级的宽度优先搜索、堆）
+
+```c++
+class Solution {
+public:
+    int trapRainWater(std::vector<std::vector<int>>& heightMap) {
+        int m = heightMap.size();
+        if (m == 0) return 0;
+        int n = heightMap[0].size();
+        if (n == 0) return 0;
+
+        std::vector<std::vector<bool>> visited(m, std::vector<bool>(n, false));//是否被搜索过
+        std::priority_queue<std::pair<int, std::pair<int, int>>, std::vector<std::pair<int, std::pair<int, int>>>, std::greater<std::pair<int, std::pair<int, int>>>> pq;//最小堆
+
+        // 将边界加入优先队列
+        for (int i = 0; i < m; i++) {//左右边界
+            pq.push({heightMap[i][0], {i, 0}});//pq.push({int,pair})
+            visited[i][0] = true;
+            pq.push({heightMap[i][n - 1], {i, n - 1}});
+            visited[i][n - 1] = true;
+        }
+        for (int j = 1; j < n - 1; j++) {//上下边界
+            pq.push({heightMap[0][j], {0, j}});
+            visited[0][j] = true;
+            pq.push({heightMap[m - 1][j], {m - 1, j}});
+            visited[m - 1][j] = true;
+        }
+
+        int ans = 0;
+        int dirs[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};//方向矩阵
+        while (!pq.empty()) {
+            auto top = pq.top();
+            pq.pop();
+            for (auto dir : dirs) {
+                int newX = top.second.first + dir[0];
+                int newY = top.second.second + dir[1];
+                if (newX >= 0 && newX < m && newY >= 0 && newY < n &&!visited[newX][newY]) {
+                    visited[newX][newY] = true;
+                    ans += std::max(0, top.first - heightMap[newX][newY]);//当前点的高度高于拓展点时
+                    pq.push({std::max(top.first, heightMap[newX][newY]), {newX, newY}});//积水后水平面升高
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+

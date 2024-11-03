@@ -158,13 +158,15 @@ public:
             }
             return profit;
         }
-		//如果交易次数有限，则使用动态规划的方法。定义一个二维数组dp，其中dp[t][i]表示进行t次交易在第i天能获得的最大利润。通过状态转移方程不断更新dp数组，最终得到最多进行k笔交易时的最大利润。
+    	//dp[i][j] 第j天i次交易最大利润
         std::vector<std::vector<int>> dp(k + 1, std::vector<int>(n, 0));
-        for (int t = 1; t <= k; t++) {
-            int maxDiff = -prices[0];
-            for (int i = 1; i < n; i++) {
-                dp[t][i] = std::max(dp[t][i - 1], prices[i] + maxDiff);
-                maxDiff = std::max(maxDiff, dp[t - 1][i - 1] - prices[i]);
+        for(int i=1;i<=k;i++){
+            int localMax = dp[i-1][0]-prices[0];//第0天价格买入
+            for(int j=1;j<n;j++){
+                //情况一：i笔交易后不持有股票①j-1天完成i笔交易②i-1笔交易，j天卖出
+                dp[i][j]=std::max(dp[i][j-1],localMax+prices[j]);
+                //情况二：i笔交易后持有股票①i-1次交易后持有股票②i-1笔交易后不持有股票，第i笔交易买入
+                localMax=std::max(localMax,dp[i-1][j]-prices[j]);
             }
         }
         return dp[k][n - 1];
