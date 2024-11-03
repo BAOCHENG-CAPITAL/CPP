@@ -31,7 +31,7 @@ public:
 };
 ```
 
-# 搜索
+# 搜索、贪心
 
 ## 2
 
@@ -43,37 +43,36 @@ public:
 class Solution {
 public:
     int maximalRectangle(vector<vector<char>>& matrix) {
-        if (matrix.empty() || matrix[0].empty()) return 0;
-        int rows = matrix.size();
-        int cols = matrix[0].size();
-        std::vector<int> histogram(cols, 0);
-        int maxArea = 0;
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
+        int m = matrix.size();
+        if (m == 0) {
+            return 0;
+        }
+        int n = matrix[0].size();
+        vector<vector<int>> left(m, vector<int>(n, 0));
+		//计算出矩阵的每个元素的左边连续1的数量，使用二维数组left记录
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
                 if (matrix[i][j] == '1') {
-                    histogram[j]++;
-                } else {
-                    histogram[j] = 0;
+                    left[i][j] = (j == 0 ? 0: left[i][j - 1]) + 1;
                 }
             }
-            maxArea = std::max(maxArea, largestRectangleArea(histogram));
         }
-        return maxArea;
-    }
-    int largestRectangleArea(std::vector<int>& heights) {
-        int n = heights.size();
-        std::stack<int> st;
-        int maxArea = 0;
-        for (int i = 0; i <= n; i++) {
-            while (!st.empty() && (i == n || heights[st.top()] >= heights[i])) {
-                int height = heights[st.top()];
-                st.pop();
-                int width = st.empty()? i : i - st.top() - 1;
-                maxArea = std::max(maxArea, height * width);
+        int ret = 0;
+        for (int i = 0; i < m; i++) {//遍历每个点，计算出当前点最大矩形面积
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == '0') {
+                    continue;
+                }
+                int width = left[i][j];
+                int area = width;
+                for (int k = i - 1; k >= 0; k--) {
+                    width = min(width, left[k][j]);//向上柱状遍历
+                    area = max(area, (i - k + 1) * width);//保留最大面积，height=(i-k+1)
+                }
+                ret = max(ret, area);
             }
-            st.push(i);
         }
-        return maxArea;
+        return ret;
     }
 };
 ```
@@ -93,17 +92,17 @@ public:
         int n = heightMap[0].size();
         if (n == 0) return 0;
 
-        std::vector<std::vector<bool>> visited(m, std::vector<bool>(n, false));
-        std::priority_queue<std::pair<int, std::pair<int, int>>, std::vector<std::pair<int, std::pair<int, int>>>, std::greater<std::pair<int, std::pair<int, int>>>> pq;
+        std::vector<std::vector<bool>> visited(m, std::vector<bool>(n, false));//是否被搜索过
+        std::priority_queue<std::pair<int, std::pair<int, int>>, std::vector<std::pair<int, std::pair<int, int>>>, std::greater<std::pair<int, std::pair<int, int>>>> pq;//最小堆
 
         // 将边界加入优先队列
-        for (int i = 0; i < m; i++) {
-            pq.push({heightMap[i][0], {i, 0}});
+        for (int i = 0; i < m; i++) {//左右边界
+            pq.push({heightMap[i][0], {i, 0}});//pq.push({int,pair})
             visited[i][0] = true;
             pq.push({heightMap[i][n - 1], {i, n - 1}});
             visited[i][n - 1] = true;
         }
-        for (int j = 1; j < n - 1; j++) {
+        for (int j = 1; j < n - 1; j++) {//上下边界
             pq.push({heightMap[0][j], {0, j}});
             visited[0][j] = true;
             pq.push({heightMap[m - 1][j], {m - 1, j}});
@@ -111,7 +110,7 @@ public:
         }
 
         int ans = 0;
-        int dirs[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        int dirs[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};//方向矩阵
         while (!pq.empty()) {
             auto top = pq.top();
             pq.pop();
@@ -120,18 +119,17 @@ public:
                 int newY = top.second.second + dir[1];
                 if (newX >= 0 && newX < m && newY >= 0 && newY < n &&!visited[newX][newY]) {
                     visited[newX][newY] = true;
-                    ans += std::max(0, top.first - heightMap[newX][newY]);
-                    pq.push({std::max(top.first, heightMap[newX][newY]), {newX, newY}});
+                    ans += std::max(0, top.first - heightMap[newX][newY]);//当前点的高度高于拓展点时
+                    pq.push({std::max(top.first, heightMap[newX][newY]), {newX, newY}});//积水后水平面升高
                 }
             }
         }
-
         return ans;
     }
 };
 ```
 
-# 贪心
+# 贪心、动态规划
 
 ## 4
 
