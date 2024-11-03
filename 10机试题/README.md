@@ -131,7 +131,7 @@ public:
 };
 ```
 
-# 动态规划
+# 贪心
 
 ## 4
 
@@ -160,7 +160,7 @@ public:
             }
             return profit;
         }
-
+		//如果交易次数有限，则使用动态规划的方法。定义一个二维数组dp，其中dp[t][i]表示进行t次交易在第i天能获得的最大利润。通过状态转移方程不断更新dp数组，最终得到最多进行k笔交易时的最大利润。
         std::vector<std::vector<int>> dp(k + 1, std::vector<int>(n, 0));
         for (int t = 1; t <= k; t++) {
             int maxDiff = -prices[0];
