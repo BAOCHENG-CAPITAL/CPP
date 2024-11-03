@@ -189,9 +189,10 @@ d) if find a 降落伞，GOTO line xxx
 | 4          | GO SOUTH 1m                   |
 | 5          | GO NORTH 1m                   |
 | 6          | GO NORTH 1m                   |
-| 7          | if find a 降落伞，GOTO line 8 |
-| 8          | GO NORTH 1m                   |
-| 9          | GOTO line 8                   |
+| 7          | if find a 降落伞，GOTO line 9 |
+| 8          | GOTO line 1                   |
+| 9          | GO NORTH 1m                   |
+| 10         | GOTO line 9                   |
 
 ## 6
 
