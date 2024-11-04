@@ -133,43 +133,110 @@ public:
 
 ## 4
 
+[121. 买卖股票的最佳时机 - 力扣（LeetCode）](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock/description/)
+
+<img src="5.png" style="zoom:33%;" />
+
+```c++
+//时间复杂度: O(n), 只需遍历一次
+//空间复杂度: O(1), 只使用了两个变量
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int inf = 1e9;
+        //minprice股票最低价格；maxprofit当前所能获得最大利润
+        int minprice = inf, maxprofit = 0;
+        for (int price: prices) {//循环迭代输入的prices
+            maxprofit = max(maxprofit, price - minprice);//当前获得的利润大于maxprofit时修改maxprofit
+            minprice = min(price, minprice);//当前价格小于minprice时修改minprice
+        }
+        return maxprofit;
+    }
+};
+```
+
+[122. 买卖股票的最佳时机 II - 力扣（LeetCode）](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/description/)
+
+<img src="6.png" style="zoom:33%;" />
+
+```c++
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int n = prices.size();
+        int dp[n][2];
+        //第0天交易结束时(第0天现实里就是第1天)
+        dp[0][0] = 0, dp[0][1] = -prices[0];
+        //dp[i][0]表示第i天交易完后手里没有股票的最大利润
+        //dp[i][1]表示第i天交易完后手里持有一支股票的最大利润(i从0开始)
+        for (int i = 1; i < n; ++i) {
+            //第i天不持有=max(第i-1天不持有,第i-1天持有今天卖出)
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
+            //第i天持有=max(第i-1天持有,第i-1天不持有今天买入)
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
+        }
+        //全部交易结束后,持有股票的收益一定低于不持有股票的收益,
+        //因此这时候dp[n-1][0]的收益必然是大于dp[n-1][1]的,所以返回dp[n-1][0]
+        return dp[n - 1][0];
+    }
+};
+```
+
+[123. 买卖股票的最佳时机 III - 力扣（LeetCode）](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iii/description/)
+
+<img src="7.png" style="zoom:33%;" />
+
+```c++
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int n = prices.size();
+        int dp[n][3][2];
+        dp[0][0][0] = 0;//第0天第0次交易不持有
+        dp[0][0][1] = -prices[0];//第0天第0次交易持有
+        dp[0][1][0] = 0;//第0天第1次交易不持有
+        dp[0][1][1] = -prices[0];//第0天第1次交易持有
+        dp[0][2][0] = 0;//第0天第2次交易不持有
+        dp[0][2][1] = -prices[0];//第0天第2次交易持有
+        for(int i = 1; i < n; i++) {
+            //第i天第0次交易持有=max(第i-1天第0次交易持有,第i-1天第0次交易不持有第i天买入)
+            dp[i][0][1] = max(dp[i - 1][0][1], -prices[i]);
+            for(int j = 1; j < 3; j++) {
+                //第i天第j次交易不持有=max(第i-1天第j次交易不持有,第i天第j-1次交易持有第i天卖出)
+                dp[i][j][0] = max(dp[i - 1][j][0], dp[i][j - 1][1] + prices[i]);
+                //第i天第j次交易持有=max(第i-1天第j次交易持有,第i天第j次交易不持有第i天买入)
+                dp[i][j][1] = max(dp[i - 1][j][1], dp[i][j][0] - prices[i]);
+            }
+        }
+        return dp[n-1][2][0];
+    }
+};
+```
+
 [188. 买卖股票的最佳时机 IV - 力扣（LeetCode）](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iv/description/)
 
 <img src="4.png" style="zoom:33%;" />
 
 ```c++
-#include <iostream>
-#include <vector>
-#include <climits>
-
+//时间复杂度:O(nk),其中n为prices的长度
+//空间复杂度:O(nk)
 class Solution {
 public:
-    int maxProfit(int k, std::vector<int>& prices) {
+    int maxProfit(int k, vector<int>& prices) {
         int n = prices.size();
-        if (n <= 1) return 0;
-
-        // 如果交易次数足够多，可以视为不限制交易次数的情况，使用贪心算法求解
-        if (k >= n / 2) {
-            int profit = 0;
-            for (int i = 1; i < n; i++) {
-                if (prices[i] > prices[i - 1]) {
-                    profit += prices[i] - prices[i - 1];
-                }
-            }
-            return profit;
+        vector<vector<array<int, 2>>> dp(n + 1, vector<array<int, 2>>(k + 2, {INT_MIN / 2, INT_MIN / 2}));
+        for (int j = 1; j <= k + 1; j++) {
+            dp[0][j][0] = 0;//第0天第j笔交易不持有->0收益
         }
-    	//dp[i][j] 第j天i次交易最大利润
-        std::vector<std::vector<int>> dp(k + 1, std::vector<int>(n, 0));
-        for(int i=1;i<=k;i++){
-            int localMax = dp[i-1][0]-prices[0];//第0天价格买入
-            for(int j=1;j<n;j++){
-                //情况一：i笔交易后不持有股票①j-1天完成i笔交易②i-1笔交易，j天卖出
-                dp[i][j]=std::max(dp[i][j-1],localMax+prices[j]);
-                //情况二：i笔交易后持有股票①i-1次交易后持有股票②i-1笔交易后不持有股票，第i笔交易买入
-                localMax=std::max(localMax,dp[i-1][j]-prices[j]);
+        for (int i = 0; i < n; i++) {
+            for (int j = 1; j <= k + 1; j++) {
+                //今天第j笔交易不持有收益 = max(昨天第j笔交易不持有股票收益,昨天第j笔交易持有卖出收益)
+                dp[i + 1][j][0] = max(dp[i][j][0], dp[i][j][1] + prices[i]);
+                //今天第j笔交易不持有收益 = max(昨天第j笔交易持有股票收益,昨天第j-1笔交易不持有买入收益)
+                dp[i + 1][j][1] = max(dp[i][j][1], dp[i][j - 1][0] - prices[i]);
             }
         }
-        return dp[k][n - 1];
+        return dp[n][k + 1][0];
     }
 };
 ```
@@ -195,13 +262,10 @@ d) if find a 降落伞，GOTO line xxx
 | 1          | GO SOUTH 1m                   |
 | 2          | GO NORTH 1m                   |
 | 3          | GO NORTH 1m                   |
-| 4          | GO SOUTH 1m                   |
-| 5          | GO NORTH 1m                   |
+| 4          | if find a 降落伞，GOTO line 6 |
+| 5          | GOTO line 1                   |
 | 6          | GO NORTH 1m                   |
-| 7          | if find a 降落伞，GOTO line 9 |
-| 8          | GOTO line 1                   |
-| 9          | GO NORTH 1m                   |
-| 10         | GOTO line 9                   |
+| 7          | GOTO line 6                   |
 
 ## 6
 
